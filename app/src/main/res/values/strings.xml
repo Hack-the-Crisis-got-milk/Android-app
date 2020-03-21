@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Got Milk</string>
+    <string name="title_shop">Grocery stores</string>
+    <string name="title_map">Map</string>
+    <string name="title_items">Items</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_map">
+
+    <fragment
+        android:id="@+id/navigation_shop"
+        android:name="com.hackthecrisis.gotmilk.ui.grocery.GroceryFragment"
+        android:label="@string/title_shop"
+        tools:layout="@layout/fragment_grocery" />
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.hackthecrisis.gotmilk.ui.map.MapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
+
+    <fragment
+        android:id="@+id/navigation_shopping_cart"
+        android:name="com.hackthecrisis.gotmilk.ui.item.ItemFragment"
+        android:label="@string/title_items"
+        tools:layout="@layout/fragment_item" />
+</navigation>
