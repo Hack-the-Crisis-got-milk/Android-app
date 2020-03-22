@@ -7,18 +7,21 @@ import com.google.gson.annotations.SerializedName;
 
 public class Feedback {
 
-    @SerializedName("type")
+    @SerializedName("id")
     @Expose
-    private String type;
-    @SerializedName("item_group_id")
-    @Expose
-    private String item_group_id;
-    @SerializedName("value")
-    @Expose
-    private String value;
+    private int id;
     @SerializedName("shop_id")
     @Expose
     private String shop_id;
+    @SerializedName("item_group_id")
+    @Expose
+    private String item_group_id;
+    @SerializedName("type")
+    @Expose
+    private String type;
+    @SerializedName("value")
+    @Expose
+    private String value;
 
     public Feedback() {}
 

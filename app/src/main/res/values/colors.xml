@@ -6,4 +6,7 @@
 
     <color name="colorShopOpened">#4CAF50</color>
     <color name="colorShopClosed">#F44336</color>
+
+    <color name="colorNlack">#000</color>
+    <color name="colorGrey">#8D8D8D</color>
 </resources>

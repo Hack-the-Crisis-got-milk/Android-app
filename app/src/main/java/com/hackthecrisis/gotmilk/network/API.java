@@ -13,9 +13,11 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Response;
+import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface API {
@@ -34,7 +36,16 @@ public interface API {
                                                   @Query("radius") int radius,
                                                   @Query("filters")JSONArray filters);
 
-
     @GET("itemgroups/")
     Call<JsonObject> getItemGroupList();
+
+    @GET("getFeedbackForShops")
+    Call<JsonObject> getFeedbackForShops(@Query("shopIds") JSONArray ids);
+
+    @FormUrlEncoded
+    @POST("provideFeedback")
+    Call<JsonObject> provideFeedback(@Field("type") String type,
+                                     @Field("item_group_id") String item_group_id,
+                                     @Field("value") String value,
+                                     @Field("shop_id") String shop_id);
 }

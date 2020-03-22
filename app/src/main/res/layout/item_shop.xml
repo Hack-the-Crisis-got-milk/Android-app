@@ -21,8 +21,8 @@
         android:id="@+id/shop_photo"
         android:layout_width="150dp"
         android:layout_height="110dp"
-        android:layout_margin="10dp"
-        android:src="@drawable/rimi" />
+        android:src="@drawable/rimi"
+            android:layout_margin="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"

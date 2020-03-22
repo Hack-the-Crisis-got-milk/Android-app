@@ -10,7 +10,16 @@ public class Service {
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 
+    private Retrofit retrofit2 = new Retrofit.Builder()
+            .baseUrl("https://secret-mountain-57394.herokuapp.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
     public API getService() {
         return retrofit.create(API.class);
+    }
+
+    public API getService2() {
+        return retrofit2.create(API.class);
     }
 }

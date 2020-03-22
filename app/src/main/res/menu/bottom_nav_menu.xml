@@ -11,9 +11,9 @@
         android:icon="@drawable/ic_map"
         android:title="@string/title_map" />
 
-    <item
-        android:id="@+id/navigation_shopping_cart"
-        android:icon="@drawable/ic_shopping_cart"
-        android:title="@string/title_items" />
+<!--    <item-->
+<!--        android:id="@+id/navigation_shopping_cart"-->
+<!--        android:icon="@drawable/ic_shopping_cart"-->
+<!--        android:title="@string/title_items" />-->
 
 </menu>

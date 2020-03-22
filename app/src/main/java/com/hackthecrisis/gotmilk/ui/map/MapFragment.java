@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -30,10 +32,12 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -41,10 +45,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hackthecrisis.gotmilk.LocationSingleton;
 import com.hackthecrisis.gotmilk.R;
+import com.hackthecrisis.gotmilk.adapter.FeedbackAdapter;
 import com.hackthecrisis.gotmilk.adapter.FilterListAdapter;
+import com.hackthecrisis.gotmilk.model.Feedback;
 import com.hackthecrisis.gotmilk.model.Filter;
 import com.hackthecrisis.gotmilk.model.ItemGroup;
 import com.hackthecrisis.gotmilk.model.Shop;
+import com.hackthecrisis.gotmilk.ui.grocery.GroceryFragment;
 
 import java.util.ArrayList;
 
@@ -84,6 +91,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return root;
     }
 
+    Handler handler;
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
@@ -91,23 +100,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
             } else {
-                googleMap.setMyLocationEnabled(true);
               //  googleMap.getUiSettings().setMyLocationButtonEnabled(true);
             }
         } else {
-            googleMap.setMyLocationEnabled(true);
+
            // googleMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.getUiSettings().setCompassEnabled(false);
 
-        Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(new Criteria(), false));
-        LocationSingleton.location = location;
+        googleMap.setMyLocationEnabled(true);
 
-        zoom(location, false);
+        Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(new Criteria(), false));
+
+        if(location != null) {
+            LocationSingleton.location = location;
+            zoom(location, false);
+        }
 
         mapViewModel.getShopList();
+        mapViewModel.getItemGroupList();
         observeShopList();
+        observeGroupItemList();
 
         handleMarkerClicks();
     }
@@ -201,10 +215,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapViewModel.getShopListLiveData().observeForever(new Observer<ArrayList<Shop>>() {
             @Override
             public void onChanged(ArrayList<Shop> shops) {
-                googleMap.clear();
-                setMarkers(shops);
-                shopArrayList = new ArrayList<>(shops);
-                Log.i("shops got", String.valueOf(shops.size()));
+                if(shops != null) {
+                    googleMap.clear();
+                    setMarkers(shops);
+                    shopArrayList = new ArrayList<>(shops);
+                    Log.i("shops got", String.valueOf(shops.size()));
+                }
             }
         });
 
@@ -221,12 +237,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         if(shops.size() > 0) {
             if(googleMap != null) {
                 for(Shop shop : shops) {
-                    Log.i("Coordinates", shop.getLocation().toString());
-                    MarkerOptions markerOptions = new MarkerOptions()
-                            .title(shop.getName())
-                            .position(new LatLng(shop.getLocation().getLat(), shop.getLocation().getLon()))
-                            .snippet(shop.getId());
-                    googleMap.addMarker(markerOptions);
+                    if(shop.getShop_type().equals("grocery")) {
+                        Log.i("Coordinates", shop.getLocation().toString());
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .title(shop.getName())
+                                .position(new LatLng(shop.getLocation().getLat(), shop.getLocation().getLon()))
+                                .snippet(shop.getId());
+                        googleMap.addMarker(markerOptions);
+                    } else if(shop.getShop_type().equals("pharmacy")) {
+                        Log.i("Coordinates", shop.getLocation().toString());
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .title(shop.getName())
+                                .position(new LatLng(shop.getLocation().getLat(), shop.getLocation().getLon()))
+                                .snippet(shop.getId())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        googleMap.addMarker(markerOptions);
+                    }
                 }
             }
         }
@@ -247,6 +273,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    private ArrayList<ItemGroup> itemGroupArrayList;
+
+    ///FEEDBACK
+
+    private RecyclerView feedbackRecyclerView;
+    private FeedbackAdapter feedbackAdapter;
+
+    private ArrayList<Feedback> feedbackArrayList;
+
+    TextView feedback_busy;
+    TextView feedback_average;
+    TextView feedback_empty;
+
     private void showShopInfoDialog(Shop shop) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = LayoutInflater.from(getContext()).inflate(R.layout.shop_feedback_dialog, null);
@@ -259,11 +298,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mapViewModel.getFeedbackLiveData().removeObservers(MapFragment.this);
+                mapViewModel.getFeedbackSent().removeObservers(MapFragment.this);
+            }
+        });
+
+        feedback_busy = view.findViewById(R.id.feedback_busy);
+        feedback_average = view.findViewById(R.id.feedback_average);
+        feedback_empty = view.findViewById(R.id.feedback_empty);
+        handleBusynessClicks(shop);
+
         ImageView photo = view.findViewById(R.id.inf_shop_photo);
-//        Glide.with(view.getContext())
-//                .load(shop.getPhoto())
-//                .centerCrop()
-//                .into(photo);
+        Glide.with(view.getContext())
+                .load(shop.getPhoto())
+                .centerCrop()
+                .into(photo);
+
+        feedbackRecyclerView = view.findViewById(R.id.feedback_recyclerview);
+        initFeedbackRecyclerView(feedbackArrayList, shop);
 
         TextView name = view.findViewById(R.id.info_shop_name);
         name.setText(shop.getName());
@@ -277,11 +332,100 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             status.setTextColor(ContextCompat.getColor(getContext(), R.color.colorShopClosed));
         }
 
-//        TextView address = view.findViewById(R.id.info_shop_address);
-//        address.setText(shop.getAddress());
+        TextView busy = view.findViewById(R.id.info_busy);
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+
+        mapViewModel.getFeedbackForShops(shop.getId(), shopArrayList);
+        observeFeedback(busy, shop);
+        observeSentFeedback();
+    }
+
+    private void handleBusynessClicks(Shop shop) {
+        feedback_busy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                feedback_busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorShopClosed));
+                feedback_average.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                feedback_empty.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                mapViewModel.sendFeedback("1", "busyness", "busy", shop.getId());
+            }
+        });
+
+        feedback_average.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                feedback_average.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+                feedback_busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                feedback_empty.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                mapViewModel.sendFeedback("1", "busyness", "average", shop.getId());
+            }
+        });
+
+        feedback_empty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                feedback_empty.setTextColor(ContextCompat.getColor(getContext(), R.color.colorShopOpened));
+                feedback_average.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                feedback_busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGrey));
+                mapViewModel.sendFeedback("1", "busyness", "empty", shop.getId());
+            }
+        });
+    }
+
+    private void observeFeedback(TextView busy, Shop shop) {
+        mapViewModel.getFeedbackLiveData().observeForever(new Observer<ArrayList<Feedback>>() {
+            @Override
+            public void onChanged(ArrayList<Feedback> feedbacks) {
+                if(feedbacks != null) {
+                    feedbackArrayList = new ArrayList<>(feedbacks);
+                    if(feedbacks.size() > 0) {
+                        initFeedbackRecyclerView(feedbacks, shop);
+                        if(feedbacks.get(0).getType().equals("busyness"))
+                            if(feedbacks.get(0).getValue().equals("busy")) {
+                                busy.setText("Busy");
+                                busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorShopClosed));
+                            } else if(feedbacks.get(0).getValue().equals("average")) {
+                                busy.setText("Average");
+                                busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+                            } else if(feedbacks.get(0).getValue().equals("empty")) {
+                                busy.setText("Empty");
+                                busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorShopOpened));
+                            }
+                    } else {
+                        busy.setText("No feedback");
+                        busy.setTextColor(ContextCompat.getColor(getContext(), R.color.colorNlack));
+                    }
+                }
+            }
+        });
+    }
+
+    //  private ArrayList<ItemGroup> itemGroupArrayList;
+
+    private void initFeedbackRecyclerView(ArrayList<Feedback> feedbacks, Shop shop) {
+        if(feedbackRecyclerView != null) {
+            feedbackRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            feedbackRecyclerView.setHasFixedSize(true);
+            ArrayList<ItemGroup> itemGroups5 = new ArrayList<>();
+            for(ItemGroup itemGroup: itemGroupArrayList) {
+                if(shop.getShop_type().equals(itemGroup.getShop_type()))
+                    itemGroups5.add(itemGroup);
+            }
+            feedbackAdapter = new FeedbackAdapter(feedbacks, itemGroups5, getContext(), new FeedbackAdapter.OnItemCheckListener() {
+                @Override
+                public void onItemCheck(ItemGroup item) {
+                    mapViewModel.sendFeedback(item.getId(), "availability", "available", shop.getId());
+                }
+
+                @Override
+                public void onItemUncheck(ItemGroup item) {
+                    mapViewModel.sendFeedback(item.getId(), "availability", "unavailable", shop.getId());
+                }
+            });
+            feedbackRecyclerView.setAdapter(feedbackAdapter);
+        }
     }
 
     ///FILTER
@@ -313,7 +457,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         builder.setView(view);
 
         itemGroupRecyclerView = view.findViewById(R.id.filter_product_recyclerview);
-        getItemGroupList();
+        if(itemGroupArrayList.size() > 0)
+            initGroupListRecyclerView(itemGroupArrayList);
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -373,11 +518,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapViewModel.getFilteredShopList(filters);
     }
 
-    private void getItemGroupList() {
-        mapViewModel.getItemGroupList();
-        observeGroupItemList();
-    }
-
     private void initGroupListRecyclerView(ArrayList<ItemGroup> itemGroups) {
         itemGroupRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         itemGroupRecyclerView.setHasFixedSize(true);
@@ -408,7 +548,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mapViewModel.getItemGroupLiveData().observeForever(new Observer<ArrayList<ItemGroup>>() {
             @Override
             public void onChanged(ArrayList<ItemGroup> itemGroups) {
-                initGroupListRecyclerView(itemGroups);
+                if(itemGroups != null)
+                    itemGroupArrayList = new ArrayList<>(itemGroups);
+            }
+        });
+    }
+
+    private void observeSentFeedback() {
+        mapViewModel.getFeedbackSent().observeForever(new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean)
+                    Toast.makeText(getContext(), "Feedback sent!", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getContext(), "Feedback wasn't sent", Toast.LENGTH_SHORT).show();
             }
         });
     }

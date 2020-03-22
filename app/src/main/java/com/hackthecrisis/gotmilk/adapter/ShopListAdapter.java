@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,18 +14,27 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.hackthecrisis.gotmilk.R;
+import com.hackthecrisis.gotmilk.model.ItemGroup;
 import com.hackthecrisis.gotmilk.model.Shop;
 
 import java.util.ArrayList;
 
 public class ShopListAdapter extends RecyclerView.Adapter<ShopListAdapter.MyViewHolder> {
 
+    public interface OnItemCheckListener {
+        void onItemCheck(Shop shop);
+    }
+
     private ArrayList<Shop> shops;
     private Context context;
 
-    public ShopListAdapter(ArrayList<Shop> shops, Context context) {
+    @NonNull
+    private ShopListAdapter.OnItemCheckListener onItemCheckListener;
+
+    public ShopListAdapter(ArrayList<Shop> shops, Context context, @NonNull ShopListAdapter.OnItemCheckListener onItemCheckListener) {
         this.shops = shops;
         this.context = context;
+        this.onItemCheckListener = onItemCheckListener;
     }
 
     public void update(ArrayList<Shop> shopsArrayList) {
@@ -57,6 +67,13 @@ public class ShopListAdapter extends RecyclerView.Adapter<ShopListAdapter.MyView
                 .load(shops.get(position).getPhoto())
                 .centerCrop()
                 .into(holder.photo);
+
+        holder.shop_feedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemCheckListener.onItemCheck(shops.get(position));
+            }
+        });
     }
 
     @Override
@@ -69,6 +86,7 @@ public class ShopListAdapter extends RecyclerView.Adapter<ShopListAdapter.MyView
         TextView status;
         TextView type;
         ImageView photo;
+        Button shop_feedback;
 
         public MyViewHolder(View view) {
             super(view);
@@ -76,6 +94,7 @@ public class ShopListAdapter extends RecyclerView.Adapter<ShopListAdapter.MyView
             status = view.findViewById(R.id.shop_open_status);
             type = view.findViewById(R.id.shop_type);
             photo = view.findViewById(R.id.shop_photo);
+            shop_feedback = view.findViewById(R.id.shop_feedback);
         }
     }
 }

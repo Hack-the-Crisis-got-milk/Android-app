@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.hackthecrisis.gotmilk.LocationSingleton;
+import com.hackthecrisis.gotmilk.model.Feedback;
 import com.hackthecrisis.gotmilk.model.Filter;
 import com.hackthecrisis.gotmilk.model.ItemGroup;
 import com.hackthecrisis.gotmilk.model.Shop;
@@ -31,10 +32,13 @@ public class GroceryViewModel extends ViewModel {
 
     private MutableLiveData<ArrayList<Shop>> shopListMutableLiveData;
     private MutableLiveData<ArrayList<ItemGroup>> itemGroupListMutableLiveData;
+    private MutableLiveData<ArrayList<Feedback>> feedbackMutableLiveData;
+    private MutableLiveData<Boolean> feedbackSent;
     private MutableLiveData<String> error;
 
     private Service service;
     API api;
+    API api2;
 
     public GroceryViewModel() {
         shopListMutableLiveData = new MutableLiveData<>();
@@ -42,6 +46,9 @@ public class GroceryViewModel extends ViewModel {
         error = new MutableLiveData<>();
         service = new Service();
         api = service.getService();
+        api2 = service.getService2();
+        feedbackMutableLiveData = new MutableLiveData<>();
+        feedbackSent = new MutableLiveData<>();
     }
 
     public LiveData<ArrayList<Shop>> getShopListLiveData() {
@@ -56,7 +63,16 @@ public class GroceryViewModel extends ViewModel {
         return error;
     }
 
+    public LiveData<ArrayList<Feedback>> getFeedbackLiveData() {
+        return feedbackMutableLiveData;
+    }
+
+    public LiveData<Boolean> getFeedbackSent() {
+        return feedbackSent;
+    }
+
     public void getShopList() {
+        shopListMutableLiveData.setValue(null);
         api.getNearbyShopList(
                 LocationSingleton.location.getLatitude(),
                 LocationSingleton.location.getLongitude(),
@@ -91,6 +107,7 @@ public class GroceryViewModel extends ViewModel {
     }
 
     public void getItemGroupList() {
+        itemGroupListMutableLiveData.setValue(null);
         api.getItemGroupList().enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
@@ -122,6 +139,7 @@ public class GroceryViewModel extends ViewModel {
     }
 
     public void getFilteredShopList(ArrayList<Filter> filters) {
+        shopListMutableLiveData.setValue(null);
         JSONArray jsonArray = new JSONArray();
         for(Filter filter: filters){
             try {
@@ -161,6 +179,66 @@ public class GroceryViewModel extends ViewModel {
             public void onFailure(Call<JsonObject> call, Throwable t) {
                 error.setValue(t.getMessage());
                 Log.i("GET shops filtered", t.getMessage());
+            }
+        });
+    }
+
+    public void getFeedbackForShops(String id, ArrayList<Shop> shops) {
+        feedbackMutableLiveData.setValue(null);
+        JSONArray jsonArray = new JSONArray();
+        try {
+            jsonArray.put(id);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        api2.getFeedbackForShops(jsonArray).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                try {
+                    Gson gson = new Gson();
+                    ArrayList<Feedback> feedbacks = new ArrayList<>();
+                    JsonObject jsonObject = response.body().getAsJsonObject("response");
+
+                    for(Shop shop: shops) {
+                        JsonArray jsonArray = jsonObject.getAsJsonArray(shop.getId());
+                        if(jsonArray != null) {
+                            for(int i = 0; i < jsonArray.size(); i++) {
+                                feedbacks.add(gson.fromJson(jsonArray.get(i), Feedback.class));
+                            }
+                            error.setValue("");
+                        } else
+                            continue;
+                    }
+                    feedbackMutableLiveData.setValue(feedbacks);
+                } catch (Exception ex) {
+                    error.setValue(ex.getMessage());
+                    Log.i("JSON GET shops filtered", ex.getMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                error.setValue(t.getMessage());
+                Log.i("GET shops filtered", t.getMessage());
+            }
+        });
+    }
+
+    public void sendFeedback(String item_group_id, String type, String value, String shop_id) {
+      //  feedbackSent.setValue(null);
+        api2.provideFeedback(type, item_group_id, value, shop_id).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                Log.i("call", call.request().body().toString());
+                if(response.code() == 200)
+                    feedbackSent.setValue(true);
+                else
+                    feedbackSent.setValue(false);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                feedbackSent.setValue(false);
             }
         });
     }
