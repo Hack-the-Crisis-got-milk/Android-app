@@ -1,87 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:background="@drawable/item_shop_bakground"
-    android:elevation="8dp"
-    android:layout_margin="10dp">
-
-    <ImageView
-        android:id="@+id/shop_photo"
-        android:layout_width="150dp"
-        android:layout_height="100dp"
-        android:layout_margin="10dp"
-        android:src="@drawable/rimi"/>
+    android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp">
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/item_shop_bakground"
+        android:elevation="4dp">
 
-        <TextView
-            android:id="@+id/shop_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rimi"
-            android:textStyle="bold"
-            android:textSize="25sp"
-            android:fontFamily="sans-serif-light"
-            android:textColor="#000"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_time"
-                android:layout_gravity="center_vertical"/>
-
-            <TextView
-                android:id="@+id/open_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Opened"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-light"
-                android:textColor="#4CAF50"
-                android:layout_gravity="center_vertical"/>
-
-        </LinearLayout>
+        <ImageView
+        android:id="@+id/shop_photo"
+        android:layout_width="150dp"
+        android:layout_height="110dp"
+        android:layout_margin="10dp"
+        android:src="@drawable/rimi" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_location_marker"
-                android:layout_gravity="center_vertical"/>
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp">
 
             <TextView
-                android:id="@+id/shop_address"
-                android:layout_width="wrap_content"
+                android:id="@+id/shop_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="Europos pr. 43, Kaunas 46329, Lituania"
-                android:textSize="12sp"
+                android:text="Rimi"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:fontFamily="sans-serif-light"
-                android:textColor="@color/colorPrimaryDark"
-                android:layout_gravity="center_vertical"/>
+                android:textColor="#000"
+                android:maxLines="2"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_time"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/shop_open_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="Opened"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#4CAF50"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_shop"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/shop_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="shop type"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="#000"
+                    android:layout_gravity="center_vertical" />
+
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/shop_feedback"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:text="send feedback"
+                android:textSize="9sp"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="#fff"/>
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/shop_feedback"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <ImageView-->
+<!--                    android:layout_width="20dp"-->
+<!--                    android:layout_height="20dp"-->
+<!--                    android:src="@drawable/ic_feedback"-->
+<!--                    android:layout_gravity="center_vertical"/>-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/shop_feedback"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginLeft="5dp"-->
+<!--                    android:text="Press to give feedback"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:textColorHighlight="@color/colorAccent"-->
+<!--                    android:textSize="12sp"-->
+<!--                    android:fontFamily="sans-serif-light"-->
+<!--                    android:textColor="@color/colorAccent"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:focusableInTouchMode="true"-->
+<!--                    android:focusable="true"/>-->
+<!--                    <requestFocus/>-->
+
+<!--            </LinearLayout>-->
 
         </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

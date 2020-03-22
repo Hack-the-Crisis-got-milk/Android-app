@@ -8,7 +8,7 @@ public class ShopLocation {
     @SerializedName("lat")
     @Expose
     private double lat;
-    @SerializedName("long")
+    @SerializedName("lng")
     @Expose
     private double lon;
 

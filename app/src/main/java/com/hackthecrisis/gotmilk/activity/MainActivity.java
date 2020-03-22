@@ -1,9 +1,10 @@
-package com.hackthecrisis.gotmilk;
+package com.hackthecrisis.gotmilk.activity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.hackthecrisis.gotmilk.R;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private void showExitDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Exit");
-        builder.setMessage("do you want to quit Got Milk?");
+        builder.setMessage("Do you want to quit Got Milk?");
         builder.setPositiveButton("Quit", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

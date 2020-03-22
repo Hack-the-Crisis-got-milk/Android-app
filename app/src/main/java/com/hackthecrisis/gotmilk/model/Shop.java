@@ -25,16 +25,24 @@ public class Shop {
     @SerializedName("photo")
     @Expose
     private String photo;
+    @SerializedName("distance")
+    @Expose
+    private double distance;
+    @SerializedName("shop_type")
+    @Expose
+    private String shop_type;
 
     public Shop() {}
 
-    public Shop(String id, String name, ShopLocation location, String address, boolean open_now, String photo) {
+    public Shop(String id, String name, ShopLocation location, String address, boolean open_now, String photo, double distance, String shop_type) {
         this.id = id;
         this.name = name;
         this.location = location;
         this.address = address;
         this.open_now = open_now;
         this.photo = photo;
+        this.distance = distance;
+        this.shop_type = shop_type;
     }
 
     public String getId() {
@@ -61,6 +69,14 @@ public class Shop {
         return photo;
     }
 
+    public double getDistance() {
+        return distance;
+    }
+
+    public String getShop_type() {
+        return shop_type;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -85,6 +101,14 @@ public class Shop {
         this.photo = photo;
     }
 
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public void setShop_type(String shop_type) {
+        this.shop_type = shop_type;
+    }
+
     @Override
     public String toString() {
         return "Shop{" +
@@ -94,6 +118,8 @@ public class Shop {
                 ", address='" + address + '\'' +
                 ", open_now=" + open_now +
                 ", photo='" + photo + '\'' +
+                ", distance=" + distance +
+                ", shop_type='" + shop_type + '\'' +
                 '}';
     }
 }
